@@ -32,7 +32,7 @@ pip install requests
 
 To get started with AeRu?, download the script and related files from the official repository:
 
-- **Source Repository**: Clone or download the script from [AyRu.py](AyRu.py).
+- **Source Repository**: Clone or download the script from [AeRu.py](AeRu.py).
   ```bash
   git clone https://github.com/bengalih/ABS-scripts.git
 
