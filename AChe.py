@@ -1,6 +1,6 @@
 # AChE - Audiobookshelf Chapter Editor
 # Copyright (C) 2025 bengalih
-# version: 0.4.1
+# version: 0.4.2
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,7 +32,9 @@ EXPORT_JSON_DIR = "chapter-json"
 IMPORT_DIR = "chapter-import"
 USE_HHMMSS = True
 SEARCH_LIMIT = 20
+# User-configurable editor (default)
 DEFAULT_EDITOR_WINDOWS = "notepad.exe"
+#DEFAULT_EDITOR_WINDOWS = "C:\\Program Files\\Microsoft Office\\root\\Office16\\EXCEL.EXE"   # Double slashes needed
 DEFAULT_EDITOR_LINUX = "nano"  # Or "gedit", "kate", etc.
 # === CONFIGURATION ===
 
@@ -164,19 +166,30 @@ def export_chapters_json(book, chapters, filename):
         json.dump(export_data, f, indent=2)
    
 def export_chapters_editable(book, chapters, filename):
-    with open(filename, 'w', encoding='utf-8') as f:
-        f.write(f"# Title: {book['title']}\n")
-        f.write(f"# Author: {book['author']}\n")
-        f.write(f"# Item ID: {book['id']}\n")
-        f.write(f"# ASIN: {book['asin']}\n")
-        f.write(f"# ISBN: {book['isbn']}\n")
-        f.write("\n")
+    try:
+        with open(filename, 'w', encoding='utf-8') as f:
+            f.write(f"# Title: {book['title']}\n")
+            f.write(f"# Author: {book['author']}\n")
+            f.write(f"# Item ID: {book['id']}\n")
+            f.write(f"# ASIN: {book['asin']}\n")
+            f.write(f"# ISBN: {book['isbn']}\n")
+            f.write("\n")
 
-        for ch in chapters:
-            title = ch.get("title", "")
-            start = ch.get("start", 0)
-            start_str = seconds_to_hhmmss(start) if USE_HHMMSS else str(start)
-            f.write(f"{title}\t{start_str}\n")
+            for ch in chapters:
+                title = ch.get("title", "")
+                start = ch.get("start", 0)
+                start_str = seconds_to_hhmmss(start) if USE_HHMMSS else str(start)
+                f.write(f"{title}\t{start_str}\n")
+
+    except PermissionError:
+        print(f"\nERROR: Could not write to '{filename}' — file may be open in another program.")
+        print("Please close the file and try again.")
+        exit(1)   # exit with error code
+
+    except Exception as e:
+        print(f"\nERROR: Failed to export chapters to '{filename}'.")
+        print(f"Details: {e}")
+        exit(1)
 
     print(f"Exported {len(chapters)} chapter(s) to '{filename}'")
     
@@ -196,7 +209,8 @@ def export_chapters_editable(book, chapters, filename):
         print(f"Opening editor for '{filename}'...")
         try:
             if platform.system() == "Windows":
-                os.startfile(filename)
+                command = f'"{EDITOR}" "{filename}"'
+                subprocess.Popen(command, shell=True)
             else:
                 subprocess.Popen([EDITOR, filename])
         except Exception as e:
