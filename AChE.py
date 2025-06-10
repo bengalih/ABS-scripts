@@ -1,6 +1,6 @@
 # AChE - Audiobookshelf Chapter Editor
 # Copyright (C) 2025 bengalih
-# version: 0.4.2
+# version: 0.4.3
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -194,14 +194,14 @@ def export_chapters_editable(book, chapters, filename):
     print(f"Exported {len(chapters)} chapter(s) to '{filename}'")
     
     while True:
-        user_input = input("==> (E)dit this file then Enter to import or e(x)it... ").strip().lower()
+        user_input = input("==> (E)dit this file then Enter to import or (q)uit... ").strip().lower()
         
-        if user_input in ("e", "x", ""):
+        if user_input in ("e", "q", ""):
             break
         
-        print("Invalid input. Please enter 'E', 'x', or just press Enter to import.")
+        print("Invalid input. Please enter 'E', 'q', or just press Enter to import.")
 
-    if user_input == "x":
+    if user_input == "q":
         print("Skipping import. You can import later via chapter-import folder.")
         exit(0)
 
