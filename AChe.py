@@ -1,6 +1,6 @@
 # AChE - Audiobookshelf Chapter Editor
 # Copyright (C) 2025 bengalih
-# version: 0.4.0
+# version: 0.4.1
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -144,6 +144,9 @@ def set_chapters(book_id, chapters):
     chapter_count = len(chapters)
     print(f"Updated {chapter_count} chapter(s) for book id {book_id}")
 
+def sanitize_filename(name):
+    # Replace invalid characters with underscore
+    return re.sub(r'[\/:*?"<>|]', '_', name)
 
 def export_chapters_json(book, chapters, filename):
     metadata = {
@@ -159,7 +162,7 @@ def export_chapters_json(book, chapters, filename):
     }
     with open(filename, 'w', encoding='utf-8') as f:
         json.dump(export_data, f, indent=2)
-
+   
 def export_chapters_editable(book, chapters, filename):
     with open(filename, 'w', encoding='utf-8') as f:
         f.write(f"# Title: {book['title']}\n")
@@ -422,8 +425,8 @@ def main():
 
     short_book_id = book['id'].split('-')[0]
 
-    json_filename = os.path.join(EXPORT_JSON_DIR, f"{book['title']}_{short_book_id}_chapters.json")
-    txt_filename = os.path.join(EXPORT_TXT_DIR, f"{book['title']}_{short_book_id}_chapters.txt")
+    json_filename = sanitize_filename(os.path.join(EXPORT_JSON_DIR, f"{book['title']}_{short_book_id}_chapters.json"))
+    txt_filename = sanitize_filename(os.path.join(EXPORT_TXT_DIR, f"{book['title']}_{short_book_id}_chapters.txt"))
 
     chapters = fetch_chapters(book["id"])
 
