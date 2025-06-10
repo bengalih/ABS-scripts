@@ -1,6 +1,6 @@
 # AeRu? - Audiobookshelf Email Report Update
 # Copyright (C) 2025 bengalih
-# version: 1.0.0
+# version: 1.0.1
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ EMAIL_FROM = 'you@example.com'
 DISPLAY_NAME = 'Audiobookshelf'
 
 # Test mode defaults
-DEFAULT_TEST_MODE = True
+DEFAULT_TEST_MODE = False
 TEST_EMAIL_TO = 'you@example.com'
 
 # Email subject
@@ -199,18 +199,19 @@ def main():
             print(f'\nProduction mode — Email will be sent to {len(recipients)} users.')
 
         if recipients:
-            send_email_with_books(
-                subject=EMAIL_SUBJECT,
-                body_text=f'The following audiobooks have been added in the past {days_back} days:',
-                books=recent_books,
-                from_addr=EMAIL_FROM,
-                to_addrs=recipients,
-                smtp_server=SMTP_SERVER,
-                smtp_port=SMTP_PORT,
-                smtp_username=SMTP_USERNAME,
-                smtp_password=SMTP_PASSWORD,
-                use_tls=SMTP_USE_TLS
-            )
+            for recipient in recipients:
+                send_email_with_books(
+                    subject=EMAIL_SUBJECT,
+                    body_text=f'The following audiobooks have been added in the past {days_back} days:',
+                    books=recent_books,
+                    from_addr=EMAIL_FROM,
+                    to_addrs=[recipient],
+                    smtp_server=SMTP_SERVER,
+                    smtp_port=SMTP_PORT,
+                    smtp_username=SMTP_USERNAME,
+                    smtp_password=SMTP_PASSWORD,
+                    use_tls=SMTP_USE_TLS
+                )
         else:
             print('\nNo valid email recipients found — no email will be sent.')
     else:
