@@ -97,7 +97,12 @@ You can create your own files for import as long as they have the `Item ID` head
 
 The script requires, and only matches on, `Item ID` as it is the only unique field to ensure no conflicts.
 
-The easiest way to find the `Item ID` is simply to export the chapters and grab the header line.
+The easiest ways to find the `Item ID` are:
+
+- Export the chapters and grab the header line.
+- Open for the book in ABS and the URL will display the `Item ID`:
+  
+  audiobookshelf.mydomain.com/audiobookshelf/item/**bbb7c502-e262-4e8b-b8de-503da6d93a71**
 
 ---
 
