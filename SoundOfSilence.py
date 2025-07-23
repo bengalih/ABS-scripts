@@ -1,6 +1,6 @@
 # SoundOfSilence - Outputs timestamps based on keyword detection at silence breaks
 # Copyright (C) 2025 bengalih
-# version: 1.0.0
+# version: 1.0.1
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -76,13 +76,15 @@ def fixup_text(text, config):
     # Remove trailing punctuation for non-matching text
     return text.rstrip('.,')
 
-def get_audio_duration(audio_path):
+def get_audio_duration(audio_path, config):
     cmd = [
-        "ffprobe", "-v", "error",
+        os.path.join(config.FFMPEG_PATH, "ffprobe"),
+        "-v", "error",
         "-show_entries", "format=duration",
         "-of", "default=noprint_wrappers=1:nokey=1",
         audio_path
     ]
+
     try:
         result = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
         return float(result.stdout.strip())
@@ -102,13 +104,14 @@ def create_test_run_file(input_file, config):
     print(f"TEST_RUN option enabled. Creating file '{test_file}' using {config.TEST_RUN_DURATION} minutes of audio...")
 
     cmd = [
-        "ffmpeg", "-y", "-i", input_file,
+        os.path.join(config.FFMPEG_PATH, "ffmpeg"),
+        "-y", "-i", input_file,
         "-t", str(duration_seconds),  # Duration in seconds
         "-c", "copy",  # Copy without re-encoding
         test_file
     ]
 
-    total_duration = min(get_audio_duration(input_file) or duration_seconds, duration_seconds)
+    total_duration = min(get_audio_duration(input_file, config) or duration_seconds, duration_seconds)
     time_pattern = re.compile(r'time=(\d{2}):(\d{2}):(\d{2})\.(\d+)')
 
     pbar = tqdm(
@@ -158,15 +161,16 @@ def create_test_run_file(input_file, config):
         return input_file
 
 def detect_silences(audio_path, config):
-    total_duration = get_audio_duration(audio_path)
+    total_duration = get_audio_duration(audio_path, config)
     if total_duration is None:
         print("Could not determine audio duration. Progress bar disabled.")
         total_duration = 0
 
-    print("Detecting silences...")
+    print(f"Detecting silences (Duration: {format_timestamp(total_duration)}) ...")
 
     cmd = [
-        "ffmpeg", "-hide_banner", "-i", audio_path,
+        os.path.join(config.FFMPEG_PATH, "ffmpeg"),
+        "-hide_banner", "-i", audio_path,
         "-af", f"silencedetect=noise={config.SILENCE_THRESHOLD}:d={config.SILENCE_DURATION}",
         "-f", "null", "-"
     ]
@@ -244,7 +248,8 @@ def extract_segment(input_file, start_time, duration, output_file, config):
     if config.DEBUG:
         print(f"Extracting {duration}-second snippet at {start_time}s...")
     cmd = [
-        "ffmpeg", "-y", "-hide_banner", "-loglevel", "error",
+        os.path.join(config.FFMPEG_PATH, "ffmpeg"),
+        "-y", "-hide_banner", "-loglevel", "error",
         "-ss", str(start_time), "-t", str(duration),
         "-i", input_file,
         "-ac", "1", "-ar", "16000", "-acodec", "pcm_s16le",
