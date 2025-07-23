@@ -26,3 +26,4 @@ Use these scripts at your own risk. I am not responsible for any loss or damage 
 - [abstoolbox](https://github.com/vito0912/abstoolbox)
 - [abs-autoconverter](https://github.com/Vito0912/abs-autoconverter)
 - [AudioBookShelf-genre-cleaner](https://github.com/gvarph/AudioBookShelf-genre-cleaner)
+- [Audiobookshelf Organizer](https://github.com/jeeftor/audiobook-organizer)
