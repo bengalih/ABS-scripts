@@ -45,6 +45,14 @@ e.g.:
 
 I am trying to work filing a bug with ffmpeg to fix this, but for now, using 7.x+ may mean the progress bar does not work for silence detection.
 The only solution is to also download a pre 7 version and use the `FFMPEG_PATH` to specify the path to that for purposes of this script.
+Note this might have peformance implications and you should see the Performance section below for more info.
+
+Also, without the progress bar it is still possible to estimate the length of progress by comparing the duration to the last reported silence found.
+
+```
+Detecting silences (Duration: 66:11:41) ...
+Progress:   0%|                                   | Elapsed 00:08 | ETA: ? | 5 silence(s) (02:33:13)
+```
 
 📝 Set `WHISPER_MODEL_PATH` or `--whisper-model-path` for location of storage for whisper models.
 Placing this in a static location will ensure it won't need to be downloaded when script is moved.
@@ -182,13 +190,24 @@ However, this may miss some section breaks.
 Setting the `SNIPPET_DURATION` longer will also signigicantly decrease performance as `faster-whisper` needs more time to transcribe a longer segment.
 Setting it shorter may improve performance, but miss out on keywords.
 
-Other running processes on a system may also severly impact transcription performance which is CPU heavy.
+The version of `ffmpeg` you have on a system may also severely impact performance.
+Versions of 7.x should offer good performance, but at the cost of a broken progress bar for silence detection.
+Versions 6.x seem to have a working progress bar, but perform silence detection 3-4x slower.
+Versions prior to this appear to work in all respects.
+You may wish to use an older version (I've tested with 4.x with good results).
+Simply specify the proper directory in `FFMPEG_PATH` or `--ffmpeg-path` for the version to use with the script.
+
+e.g:
+
+ `--ffmpeg-path "c:\Program Files\ffmpeg\bin4"`
 
 The script is designed as a single thread/process/queue.  After silence detection, it extracts each detected silence in turn via `ffmpeg` and then transcribes with `faster-whisper`.
 Some testing was done doing tasks in parallel, but no major improvements were found for an overly complex change in code.
 Best performance will come with better system specs, and utilizing the best `WHISPER_DEVICE` and `WHISPER_COMPUTE_TYPE` for your setup.
 
 The `tiny.en` model was chosen for speed, and seems sufficient for purposes of this script.
+
+Other running processes on a system may also severly impact transcription performance which is CPU heavy.
 
 ---
 
