@@ -13,7 +13,7 @@ The following scripts are specific to ABS management only:
 ## Assorted Scripts
 These scripts are for general management of audiobooks and not specific for ABS only:
 - [SoundOfSilence](SoundOfSilence.md) — **Sound Of Silence** - Outputs timestamps based on keyword detection at silence breaks.  Used to find proper chapter breaks based on Whisper transcription.
-- 
+
 ⚠️ **Warning:**
 
 These scripts may make changes to your ABS metadata (and, if enabled your media files).
