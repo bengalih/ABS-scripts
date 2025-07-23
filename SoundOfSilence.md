@@ -38,6 +38,14 @@ pip install faster-whisper tqdm
 ⚠️ Ensure FFmpeg and FFprobe are installed and added to your system path, or specify the directory via `FFMPEG_PATH` or `--ffmpeg-path`.
 This is important, especially for faster-whisper.  When in doubt, manually specify the path!
 
+⚠️ Newer ffmpeg versions (post 6.x) have a bug where they do not properly update the time stampes with the `silencedetect` filter and a `null` output (as is standard way to run `silencedetect`).
+
+e.g.:
+`frame=    1 fps=0.1 q=-0.0 Lsize=N/A time=00:00:00.00 bitrate=N/A speed=1.12e-06x elapsed=0:00:09.81`
+
+I am trying to work filing a bug with ffmpeg to fix this, but for now, using 7.x+ may mean the progress bar does not work for silence detection.
+The only solution is to also download a pre 7 version and use the `FFMPEG_PATH` to specify the path to that for purposes of this script.
+
 📝 Set `WHISPER_MODEL_PATH` or `--whisper-model-path` for location of storage for whisper models.
 Placing this in a static location will ensure it won't need to be downloaded when script is moved.
 Defaults to current directory `.\whisper-models`
