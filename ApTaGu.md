@@ -1,7 +1,5 @@
 # ApTaGu – Audiobookshelf Path Tag and Genre Updater
 
-**Author:** bengalih  
-
 ApTaGu is a Python script that updates or removes tags and genres for audiobooks in your [Audiobookshelf](https://www.audiobookshelf.org/) library based on file path patterns. This tool helps you apply consistent metadata based on your folder structure or filename conventions.
 
 ---
@@ -124,6 +122,7 @@ You are free to use, modify, and distribute this software under the following co
 
 ## 🙋‍♂️ Author
 
-**bengalih** – passionate about audiobook automation.  
-Feedback, bugs, or improvements? Feel free to open an issue or contribute!
+**bengalih** 
+Feedback, bugs, or improvements?
+Feel free to open an issue or contribute!
 
