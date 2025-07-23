@@ -201,6 +201,9 @@ e.g:
 
  `--ffmpeg-path "c:\Program Files\ffmpeg\bin4"`
 
+ Windows users may have difficulty finding older releases.  I recommend searching for `ffmpeg-4.4.1-full_build.7z` to find an older version that seems to work fully and quickly.
+ While this version may be years old, its functions for the purpose of this script seem sufficient.
+
 The script is designed as a single thread/process/queue.  After silence detection, it extracts each detected silence in turn via `ffmpeg` and then transcribes with `faster-whisper`.
 Some testing was done doing tasks in parallel, but no major improvements were found for an overly complex change in code.
 Best performance will come with better system specs, and utilizing the best `WHISPER_DEVICE` and `WHISPER_COMPUTE_TYPE` for your setup.
