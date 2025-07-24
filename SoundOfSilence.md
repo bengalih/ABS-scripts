@@ -93,7 +93,7 @@ class Config:
         self.TARGET_NUMBERS_ONLY = False # Only look for sections starting with numbers.
         self.TARGET_FIRST_WORD_ONLY = True  # Only count target words if they are the first word in transcription
         # Whisper Model Configuration
-        self.WHISPER_MODEL = "tiny.en"
+        self.WHISPER_MODEL = "tiny"
         self.WHISPER_DEVICE = "cpu"
         self.WHISPER_COMPUTE_TYPE = "int8"
         # File Options
@@ -145,13 +145,16 @@ See the note on FFMpeg path configuration under Requirements.
 > 
 > When using this option, it is recommended to set `--target-first-word-only` or `TARGET_FIRST_WORD_ONLY` to `True` for accuracy.
 > However this will only detect sections up to 100.  Setting to `False` may be less accurate, but find sections numbered above 100.
+>
+> 📝 The use of multiple words for `TARGET_WORDS` or `--target-words` is supported as shown.  However phrases can also be used.
+> such as "This is the end of disc".  While not fully tested, this seems to work, however be sure to set `TARGET_FIRST_WORD_ONLY` or `--target-first-word-only` to `False`
 
 
 ---
 
 ## 🧪 Examples
 
-### Basic transcription preview:
+### Basic transcription with added words:
 Will add specified `--target-words` onto `TARGET_WORDS` list
 ```bash
 python SoundOfSilence.py audio.mp3 --target-words Introduction --target-words Epilogue
@@ -208,7 +211,7 @@ The script is designed as a single thread/process/queue.  After silence detectio
 Some testing was done doing tasks in parallel, but no major improvements were found for an overly complex change in code.
 Best performance will come with better system specs, and utilizing the best `WHISPER_DEVICE` and `WHISPER_COMPUTE_TYPE` for your setup.
 
-The `tiny.en` model was chosen for speed, and seems sufficient for purposes of this script.
+The `tiny` model was chosen for a balance of speed and performance.  It's performance rivaled `tiny.en` and produced less misses.
 
 Other running processes on a system may also severly impact transcription performance which is CPU heavy.
 
