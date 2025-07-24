@@ -1,6 +1,6 @@
 # SoundOfSilence - Outputs timestamps based on keyword detection at silence breaks
 # Copyright (C) 2025 bengalih
-# version: 1.0.1
+# version: 1.0.2
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ class Config:
         self.TARGET_NUMBERS_ONLY = False # Only look for sections starting with numbers.
         self.TARGET_FIRST_WORD_ONLY = True  # Only count target words if they are the first word in transcription
         # Whisper Model Configuration
-        self.WHISPER_MODEL = "tiny.en"
+        self.WHISPER_MODEL = "tiny"
         self.WHISPER_DEVICE = "cpu"
         self.WHISPER_COMPUTE_TYPE = "int8"
         # File Options
