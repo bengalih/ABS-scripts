@@ -1,6 +1,6 @@
 # AChE - Audiobookshelf Chapter Editor
 # Copyright (C) 2025 bengalih
-# version: 0.4.3
+# version: 0.5.0
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+import argparse
 import requests
 import json
 import os
@@ -54,22 +55,34 @@ SESSION.headers.update({
 })
 
 def seconds_to_hhmmss(seconds):
-    seconds = int(round(seconds))
-    h = seconds // 3600
-    m = (seconds % 3600) // 60
-    s = seconds % 60
-    return f"{h:02d}:{m:02d}:{s:02d}"
+    h = int(seconds // 3600)
+    m = int((seconds % 3600) // 60)
+    s = int(seconds % 60)
+    ms = int((seconds - int(seconds)) * 1000)
+    return f"{h:02d}:{m:02d}:{s:02d}.{ms:03d}"
 
 def hhmmss_to_seconds(hms):
     parts = hms.strip().split(":")
     if len(parts) == 3:
-        h, m, s = parts
-        return int(h)*3600 + int(m)*60 + float(s)
+        h, m, s_ms = parts
+        if "." in s_ms:
+            s, ms = s_ms.split(".")
+            return int(h) * 3600 + int(m) * 60 + int(s) + int(ms) / 1000
+        else:
+            return int(h) * 3600 + int(m) * 60 + float(s_ms)
     elif len(parts) == 2:
-        m, s = parts
-        return int(m)*60 + float(s)
+        m, s_ms = parts
+        if "." in s_ms:
+            s, ms = s_ms.split(".")
+            return int(m) * 60 + int(s) + int(ms) / 1000
+        else:
+            return int(m) * 60 + float(s_ms)
     else:
-        return float(hms)
+        if "." in hms:
+            s, ms = hms.split(".")
+            return int(s) + int(ms) / 1000
+        else:
+            return float(hms)
 
 def get_library_id():
     url = f"{ABS_SERVER}/api/libraries"
@@ -87,7 +100,6 @@ def search_books(library_id, query):
     "q": query,
     "limit": SEARCH_LIMIT
     }
-
 
     try:
         r = SESSION.get(url, params=params)
@@ -128,7 +140,6 @@ def validate_book_id(book_id):
         return returned_id == book_id
     except requests.RequestException:
         return False
-
 
 def fetch_chapters(book_id):
     url = f"{ABS_SERVER}/api/items/{book_id}?expanded=1"
@@ -219,7 +230,6 @@ def export_chapters_editable(book, chapters, filename):
         # Wait for user to confirm after editing
         input("Press Enter after you finish editing to import chapters...")
 
-
 def import_chapters_from_cue(filename):
     chapters = []
     current_title = None
@@ -256,7 +266,6 @@ def import_chapters_from_cue(filename):
 
     return chapters
 
-
 def import_chapters_editable(filename):
     # If it's a CUE file, parse it via CUE parser
     if filename.lower().endswith(".cue"):
@@ -276,11 +285,11 @@ def import_chapters_editable(filename):
             print(f"Skipping malformed line {idx+1}: {line}")
             continue
         title, time_str = line.split("\t", 1)
-        if re.match(r"^\d+:\d{2}:\d{2}$", time_str) or re.match(r"^\d+:\d{2}$", time_str):
+        if re.match(r"^\d+:\d{2}:\d{2}(\.\d{1,3})?$", time_str) or re.match(r"^\d+:\d{2}(\.\d{1,3})?$", time_str):
             start = hhmmss_to_seconds(time_str)
         else:
             try:
-                start = float(time_str)
+                start = float(time_str.replace(",", "."))
             except:
                 print(f"Invalid time format on line {idx+1}: {time_str}, skipping")
                 continue
@@ -297,7 +306,6 @@ def import_chapters_editable(filename):
         chapters[-1]["end"] = chapters[-1]["start"] + 600
 
     return chapters
-
 
 def scan_import_folder(library_id):
     if not os.path.isdir(IMPORT_DIR):
@@ -346,7 +354,6 @@ def scan_import_folder(library_id):
         print("No valid import files found.")
         return
 
-
     print("\nImport candidates:")
     for idx, c in enumerate(import_candidates):
         meta = c['meta']
@@ -369,7 +376,6 @@ def scan_import_folder(library_id):
     if mode == "n":
         return
 
-
     for c in import_candidates:
         if mode == "s":
             single = input(f"Import '{c['filename']}'? (y/n): ").strip().lower()
@@ -389,11 +395,23 @@ def scan_import_folder(library_id):
             print(f"{book_name} with Item ID {book_id} not found in library, skipping.")
             continue
 
-
         new_chapters = import_chapters_editable(c['path'])
         set_chapters(book_id, new_chapters)
 
 def main():
+    parser = argparse.ArgumentParser(description='Export/Edit/Import Chapters from file to ABS')
+    parser.add_argument('--file', help='Path to chapter file')
+    parser.add_argument('--item_id', type=str, help='ID of item to import chapter to')
+    args = parser.parse_args()
+
+    # Only import file if command lines given
+    if args.file and not args.item_id:
+        parser.error("--item_id is required when --file is specified")
+    else:
+        new_chapters = import_chapters_editable(args.file)
+        set_chapters(args.item_id, new_chapters)
+        exit()
+        
     os.makedirs(EXPORT_JSON_DIR, exist_ok=True)
     os.makedirs(EXPORT_TXT_DIR, exist_ok=True)
     os.makedirs(IMPORT_DIR, exist_ok=True)
