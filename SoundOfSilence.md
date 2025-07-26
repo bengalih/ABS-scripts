@@ -236,6 +236,11 @@ _ Windows users may have difficulty finding older releases.  I recommend searchi
 
 - Other running processes on a system may also severly impact transcription performance which is CPU heavy.
 
+- The best performance increases will be obtained with faster hardware.  Specifically a GPU (NVIDIA) which can take advantage of CUDA.
+While I have not tested on this configuration it should be as simple as installing [PyTorch] (https://pytorch.org/get-started/locally/) with CUDA support.
+Then, you may need to set `--whisper-device` to `gpu` if the default `auto` setting does not detect your GPU.
+If `gpu` gives errors, you will need to diagnose those with `whisper` or `faster-whisper`.
+ 
 ---
 
 ## 🧾 License
