@@ -178,11 +178,11 @@ When `--file-output` is enabled (default), the script generates:
 - `*_chapters.txt` – List of detected chapter timestamps and optionally the transcribed text
 
 The `*_chapters.txt` file can be opened in any standard editor and the timestamps can be used to enter into ABS.
-This can be a manual process, so you can leverage [ACHe](ACHe.md) to automatically import the chapters.
+This can be a manual process, so you can leverage [AChE](AChE.md) to automatically import the chapters.
 While you can import the file directly, you may want to open it up and manually verify or fixup chapters prior to imporatation.
 You can, of course, also import them and fix them up within ABS as well.
 
-To import with [ACHe](ACHe.md) you would run:
+To import with [AChE](AChE.md) you would run:
 
 `ACHe.py --file audio_chapters.txt --item_id 3ea96595-67c2-4579-a64e-04f50f99e247`
 
