@@ -1,6 +1,6 @@
 # AChE - Audiobookshelf Chapter Editor
 # Copyright (C) 2025 bengalih
-# version: 0.5.0
+# version: 0.5.4
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -190,7 +190,7 @@ def export_chapters_editable(book, chapters, filename):
                 title = ch.get("title", "")
                 start = ch.get("start", 0)
                 start_str = seconds_to_hhmmss(start) if USE_HHMMSS else str(start)
-                f.write(f"{title}\t{start_str}\n")
+                f.write(f"{start_str}\t{title}\n")
 
     except PermissionError:
         print(f"\nERROR: Could not write to '{filename}' — file may be open in another program.")
@@ -266,6 +266,7 @@ def import_chapters_from_cue(filename):
 
     return chapters
 
+    
 def import_chapters_editable(filename):
     # If it's a CUE file, parse it via CUE parser
     if filename.lower().endswith(".cue"):
@@ -273,18 +274,33 @@ def import_chapters_editable(filename):
         return import_chapters_from_cue(filename)
 
     chapters = []
-    with open(filename, 'r', encoding='utf-8') as f:
-        lines = f.readlines()
+    
+    # Try multiple encodings
+    encodings_to_try = ['utf-8', 'utf-8-sig', 'windows-1252', 'iso-8859-1']
+    
+    for encoding in encodings_to_try:
+        try:
+            with open(filename, 'r', encoding=encoding) as f:
+                lines = f.readlines()
+            break
+        except UnicodeDecodeError:
+            continue
+    else:
+        # If all fail, use utf-8 with error replacement
+        with open(filename, 'r', encoding='utf-8', errors='replace') as f:
+            lines = f.readlines()    
 
     # Skip header lines
     lines = [line for line in lines if not line.startswith("#") and line.strip()]
 
     for idx, line in enumerate(lines):
         line = line.strip()
-        if "\t" not in line:
-            print(f"Skipping malformed line {idx+1}: {line}")
-            continue
-        title, time_str = line.split("\t", 1)
+        if "\t" in line:
+            time_str, title = line.split("\t", 1)
+        else:
+            time_str = line
+            title = "(empty)"
+            
         if re.match(r"^\d+:\d{2}:\d{2}(\.\d{1,3})?$", time_str) or re.match(r"^\d+:\d{2}(\.\d{1,3})?$", time_str):
             start = hhmmss_to_seconds(time_str)
         else:
@@ -400,23 +416,37 @@ def scan_import_folder(library_id):
 
 def main():
     parser = argparse.ArgumentParser(description='Export/Edit/Import Chapters from file to ABS')
+    parser.add_argument('--lookup', help='Lookup book')
     parser.add_argument('--file', help='Path to chapter file')
     parser.add_argument('--item_id', type=str, help='ID of item to import chapter to')
     args = parser.parse_args()
 
+    library_id = get_library_id()
+    
     # Only import file if command lines given
-    if args.file and not args.item_id:
-        parser.error("--item_id is required when --file is specified")
-    else:
-        new_chapters = import_chapters_editable(args.file)
-        set_chapters(args.item_id, new_chapters)
+    if args.lookup:
+        matches = search_books(library_id, args.lookup)
+        if not matches:
+            print("No matches found.")
+            exit()
+        if len(matches) == 1:
+            book = matches[0]
+        else:
+            print("\nMultiple matches found:")
+        for idx, m in enumerate(matches):
+                print(f"{str(idx+1) + '.':<4} {m['title']:<40} {m['author']:<20} {m['id']}")
         exit()
+    if args.file:
+        if not args.item_id:
+            parser.error("--item_id is required when --file is specified")
+        else:
+            new_chapters = import_chapters_editable(args.file)
+            set_chapters(args.item_id, new_chapters)
+            exit()
         
     os.makedirs(EXPORT_JSON_DIR, exist_ok=True)
     os.makedirs(EXPORT_TXT_DIR, exist_ok=True)
     os.makedirs(IMPORT_DIR, exist_ok=True)
-
-    library_id = get_library_id()
 
     # First, scan import folder
     scan_import_folder(library_id)
